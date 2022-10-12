@@ -17,6 +17,14 @@ port = 5912
 srcs = {}
 data = {}
 
+# define utilities
+
+def make_request(url):
+  req = Request(url)
+  with urlopen(req) as res:
+    json_str = res.read().decode('utf-8')
+  return loads(json_str)
+
 # parse configuration
 
 with open(file, 'r') as f:
@@ -26,13 +34,10 @@ with open(file, 'r') as f:
 
 # get source URL data
 
-for name, url in srcs.items():
+for name, src in srcs.items():
   # build data dict with route name as key and source URL data as value
-  # by making request per srcs dict pair and reading JSON to dict
-  req = Request(url)
-  with urlopen(req) as res:
-    json_str = res.read().decode('utf-8')
-  data[name] = loads(json_str)
+  # by making request per source URL and storing parsed response
+  data[name] = make_request(src) if not isinstance(src, list) else [make_request(item) for item in src]
 
 # merge data for /all
 

@@ -5,9 +5,12 @@ from urllib.request import Request, urlopen
 from json import loads, dumps
 from socketserver import BaseRequestHandler, TCPServer
 
+# - external library
+from yaml import safe_load
+
 # set default values
 
-file = 'spindle.txt'
+file = 'spindle.yaml'
 host = 'localhost'
 port = 5912
 
@@ -17,10 +20,9 @@ data = {}
 # parse configuration
 
 with open(file, 'r') as f:
-  # build srcs dict with route name as key and source URL as value
-  # by dropping first colon per line and stripping whitespace
-  conf = f.readlines()
-  srcs = dict([[items[0].strip(), items[2].strip()] for line in conf for items in [line.partition(':')]])
+  # extract config to srcs dict with route name as key and source URL as value
+  conf = f.read()
+  srcs = safe_load(conf)
 
 # get source URL data
 

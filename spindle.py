@@ -37,7 +37,9 @@ with open(file, 'r') as f:
 for name, src in srcs.items():
   # build data dict with route name as key and source URL data as value
   # by making request per source URL and storing parsed response
-  data[name] = make_request(src) if not isinstance(src, list) else [make_request(item) for item in src]
+  data[name] = make_request(src) if isinstance(src, str)\
+    else [make_request(item) for item in src] if isinstance(src, list)\
+    else dict([[item[0], make_request(item[1])] for item in src.items()])
 
 # merge data for /all
 

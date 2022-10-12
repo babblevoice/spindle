@@ -4,12 +4,12 @@ Provisionally named work in progress.
 
 ## Todo
 
-- revise configuration for use of yaml
 - refresh source data at default and per route intervals
 - allow for route definition using:
-  - multiple sources combined
+  - mixed data structures
   - other defined routes
   - source data subsets
+  - other HTTP methods
 - persist source data
 - containerise
 - ...
@@ -19,21 +19,28 @@ Provisionally named work in progress.
 The following dependencies are used:
 
 - Python 3
+- [PyYAML](https://github.com/yaml/pyyaml)
 
-The spindle root directory requires a configuration file - spindle.txt.
+The spindle root directory requires a configuration file - spindle.yaml.
 
 ## Recombination
 
-The configuration file lists pairs of values, each pair being a route name and a source URL, one pair per line, with the route name and source URL separated by a colon and any number of spaces. Each route name is a GET endpoint to be served by spindle, while the corresponding source URL the endpoint called by spindle to provide the data for that route.
+The configuration file is a set of key-value pairs in YAML format. Each key is a route name and each value a source URL string or a YAML sequence or mapping of source URL strings. The route name is a GET endpoint to be served by spindle, while each corresponding source URL is an endpoint called by spindle to provide the data for that route.
 
 For example, for the test endpoints in [Development](#development) below:
 
-```
+```yaml
 route1: http://localhost:8000/one
 route2: http://localhost:8000/two
+route3:
+  - http://localhost:8000/one
+  - http://localhost:8000/two
+route4:
+  one: http://localhost:8000/one
+  two: http://localhost:8000/two
 ```
 
-An additional route named `/all` is available by default. This returns a JSON string with keys corresponding to the route names in the configuration file, with the value for each key the data returned by that endpoint.
+One additional route - `/all` - is available by default. This returns a JSON string with keys corresponding to the route names in the configuration file, with the value for each key the data returned by that endpoint.
 
 When the main file is run, all source URLs are called and each corresponding route is served by default at `localhost:5912` ('SPIN').
 

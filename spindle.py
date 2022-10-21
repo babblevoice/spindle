@@ -15,7 +15,11 @@ host = 'localhost'
 port = 5912
 
 source = {}
+routes = []
 values = {}
+
+pending = {}
+pending_prefix = '_spindle_pending_'
 
 # define utilities
 
@@ -29,15 +33,37 @@ def make_request(url):
 # define primaries
 
 def gather_values_initial(item):
-  # return value for each source URL
+  # return value for each source URL or placeholder if route pending
   # handle base case
   if isinstance(item, str):
-    return make_request(item)
+    # assumed URL: make request and return response
+    if item not in routes: return make_request(item)
+    # assumed route name:
+    # - value currently available: return data
+    if item in values and (not isinstance(values[item], str)\
+      or pending_prefix not in values[item]):
+      return values[item]
+    # - value unavailable: mark route pending
+    placeholder = pending_prefix + item
+    pending[placeholder] = item
+    return placeholder
   # recurse for nested items
   if isinstance(item, list):
     return [gather_values_initial(nested_item) for nested_item in item]
   if isinstance(item, dict):
     return {key: gather_values_initial(value) for key, value in item.items()}
+
+def insert_values_pending(item):
+  # return values with each final value substituted for placeholder
+  # handle base case
+  if isinstance(item, str) and item in pending.keys():
+    return values[pending[item]]
+  # recurse for nested items
+  if isinstance(item, list):
+    return [insert_values_pending(nested_item) for nested_item in item]
+  if isinstance(item, dict):
+    return {key: insert_values_pending(value) for key, value in item.items()}
+  return item
 
 # parse configuration
 
@@ -45,12 +71,17 @@ with open(file, 'r') as f:
   # extract config to source dict with route name as key and source URL as value
   config = f.read()
   source = safe_load(config)
+  routes = source.keys()
 
 # get source URL values
 
 for name, src in source.items():
   # build values dict with route name as key and source URL data as value
   values[name] = gather_values_initial(src)
+
+for _ in enumerate(pending):
+  # update values dict with final values for routes marked pending
+  values = insert_values_pending(values)
 
 # merge values for /all
 

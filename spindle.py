@@ -23,6 +23,14 @@ pending_prefix = '_spindle_pending_'
 
 # define utilities
 
+def pluck_subset(item, keys):
+  # return value from data tree
+  for key in keys:
+    try: key = int(key)
+    except Exception: pass
+    item = item[key]
+  return item
+
 def make_request(url):
   # return parsed JSON response
   req = Request(url)
@@ -32,12 +40,28 @@ def make_request(url):
 
 # define primaries
 
+def locate_value(url, keys=None):
+  # handle any URL subset part
+  if '[' in url or ']' in url:
+    err = SyntaxError(f'Incomplete subset in URL "{url}"')
+    # split URL if subset delimited
+    if not ']' in url or not '[' in url: raise err
+    parts = url.split('[')
+    url = parts[0].strip()
+    # extract keys if notation full
+    if '.' != parts[1].strip()[0]: raise err
+    keys = [key.strip() for key in parts[1][:-1].split('.')[1:]]
+  value = make_request(url)
+  # restrict data to any subset
+  if keys: value = pluck_subset(value, keys)
+  return value
+
 def gather_values_initial(item):
   # return value for each source URL or placeholder if route pending
   # handle base case
   if isinstance(item, str):
     # assumed URL: make request and return response
-    if item not in routes: return make_request(item)
+    if item not in routes: return locate_value(item)
     # assumed route name:
     # - value currently available: return data
     if item in values and (not isinstance(values[item], str)\

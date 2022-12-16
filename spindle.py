@@ -1,6 +1,7 @@
 # include global dependencies
 
 # - standard library
+from sys import argv
 from urllib.request import Request, urlopen
 from json import loads, dumps
 from socketserver import BaseRequestHandler, TCPServer
@@ -8,9 +9,9 @@ from socketserver import BaseRequestHandler, TCPServer
 # - external library
 from yaml import safe_load
 
-# set default values
+# set default values and handle CLI options
 
-file = 'spindle.yaml'
+file = 'spindle.yaml' if '--file' not in argv else argv[argv.index('--file') + 1]
 host = 'localhost'
 port = 5912
 

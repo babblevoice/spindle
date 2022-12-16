@@ -1,0 +1,15 @@
+route1: http://localhost:8000/one
+route2: http://localhost:8000/two
+route3:
+  - http://localhost:8000/one
+  - one: http://localhost:8000/one
+    two: http://localhost:8000/two
+route4:
+  one: http://localhost:8000/one
+  two:
+    - http://localhost:8000/one
+    - http://localhost:8000/two
+  six: route6
+#route5: http://localhost:8000/old
+route6: http://localhost:8000/one[.key1]
+route7: route2[.1.key2b]

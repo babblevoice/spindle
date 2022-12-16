@@ -15,7 +15,9 @@ Provide a flat API each route of which returns data collated from one or more ot
 ## Todo
 
 - refresh source data at default and per route intervals
-- allow for route definition using other HTTP methods
+- allow for route definition using:
+  - other HTTP methods
+  - data tree level transformations via the data subset indicator
 - provide management routes:
   - `/get`, for configuration file content
   - `/set`, for live route definition
@@ -35,13 +37,27 @@ The spindle root directory requires a configuration file - spindle.yaml.
 
 ## Recombination
 
-The configuration file is a set of key-value pairs in YAML format. Each key is a route name and each value a source string consisting of a URL or other defined route name, or a YAML sequence or mapping of the same.
+The configuration file is a set of key-value pairs in YAML format.
 
-A route name is a GET endpoint to be served by spindle, while each source string URL is an endpoint called by spindle to provide the data for that route. A route name used in a source string represents the reuse of data from the given route.
+### Route names
 
-Each source, whether URL or route name, may have a data subset indicator appended, allowing a value on its corresponding data tree to be returned directly. A source string with a data subset indicator takes the form `some_url/some_route_name[.item_1.item_2.item_n]`, where the nested items may be referenced by either a sequence index or mapping key.
+Each key in the YAML configuration file is a route name. A route name is simply an arbitrary identifier for a GET endpoint to be served by spindle.
 
-For example, for the test endpoints in [Development](#development) below:
+### Sources
+
+Each value in the YAML configuration file is one of the following:
+
+- a source string consisting of a URL, a GET endpoint called by spindle to provide the data for the given route
+- a source string consisting of another route name defined elsewhere in the file, representing the reuse of the data from that route
+- a YAML sequence or mapping of either of the above types of source string
+
+#### Data subset indicators
+
+Each source string, whether URL or route name, may have a data subset indicator appended, allowing a value on its corresponding data tree to be returned directly. A source string with a data subset indicator takes the form `some_url/some_route_name[.item_1.item_2.item_n]`, where the nested items may be referenced by either a sequence index or mapping key.
+
+### Example
+
+For the test endpoints in [Development](#development) below, the following YAML configuration could be created:
 
 ```yaml
 route1: http://localhost:8000/one
@@ -63,9 +79,15 @@ route7: route2[.1.key2b]
 
 Routes `-3` and `-4` demonstrate the use of nested sequences and mappings, `-4` and `-7` a route name as a source and `-6` and `-7` the data subset indicator.
 
-One additional route - `/all` - is available by default. This returns a JSON string with keys corresponding to the route names in the configuration file, with the value for each key the data returned by that endpoint.
+A file with this content can be found at test/test.yaml.
 
-When the main file is run, all source URLs are called and each corresponding route is served by default at `localhost:5912` ('SPIN').
+### The /all route
+
+One additional route - `/all` - is available by default. This returns a JSON string with keys corresponding to the route names in the configuration file, with the value for each key the data returned by that route.
+
+### Serving the API
+
+When the main file is run, all source URLs are called and the data for each route is served by default at `localhost:5912` ('SPIN').
 
 ## CLI commands
 
@@ -73,7 +95,9 @@ The main file can be run with the command `python3 spindle.py`.
 
 ### Development
 
-A development server listening at `localhost:8000` can be set up quickly using [FastAPI and Uvicorn](https://github.com/tiangolo/fastapi#installation). With the dependencies installed, a file named main.py can be created to define the development endpoints, which for the example in [Recombination](#recombination) above could contain the following:
+A development server listening at `localhost:8000` can be set up quickly using [FastAPI and Uvicorn](https://github.com/tiangolo/fastapi#installation).
+
+With the dependencies installed, a file is created to define the development endpoints, which for the example in [Recombination](#recombination) above could contain the following:
 
 ```python
 from fastapi import FastAPI
@@ -89,4 +113,4 @@ def read_two():
   return [{'key2a': 'value2a'}, {'key2b': 'value2b'}]
 ```
 
-The server can then be run with the command `uvicorn main:app`.
+A file with this content can be found at test/test.py and run from that directory with the command `uvicorn test:app`.

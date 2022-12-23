@@ -43,7 +43,7 @@ The configuration file is a set of key-value pairs in YAML format.
 
 Each key in the YAML configuration file is a route name. A route name is simply an arbitrary identifier for a GET endpoint to be served by spindle.
 
-### Sources
+### Source strings
 
 Each value in the YAML configuration file is one of the following:
 
@@ -93,11 +93,11 @@ When the main file is run, all source URLs are called and the data for each rout
 
 The main file can be run with the command `python3 spindle.py`.
 
-### Development
+### Development and testing
 
-A development server listening at `localhost:8000` can be set up quickly using [FastAPI and Uvicorn](https://github.com/tiangolo/fastapi#installation).
+A development and test source server listening at `localhost:8000` can be set up quickly using [FastAPI and Uvicorn](https://github.com/tiangolo/fastapi#installation).
 
-With the dependencies installed, a file is created to define the development endpoints, which for the example in [Recombination](#recombination) above could contain the following:
+With the dependencies installed, a file is created to define the endpoints, which for the example in [Recombination](#recombination) above could contain the following:
 
 ```python
 from fastapi import FastAPI
@@ -114,3 +114,5 @@ def read_two():
 ```
 
 A file with this content can be found at test/test.py and run from that directory with the command `uvicorn test:app`.
+
+A test file for the source server can be found at test/test.py.spec.sh. While the server is listening at the default URL, the test cases can be run from that directory with the command `./test`.

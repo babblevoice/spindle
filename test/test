@@ -1,0 +1,39 @@
+#!/bin/bash
+
+# handle use for assertions
+
+assert() {
+  if [ "$2" = "$3"  ]; then
+    echo -e "✓" "$1" #\u2713
+  else
+    echo -e "×" "$1" #\u00D7
+  fi
+}
+
+if [ -n "$1" ] && [ -n "$2" ] && [ -n "$3" ]; then
+  assert "$1" "$2" "$3"
+  exit 0
+fi
+
+# handle use as test runner
+
+t=0
+p=0
+
+for file in *.sh; do
+  echo $file
+  while read -r line; do
+
+   ((t++))
+   echo $line
+
+   if [ "✓" = "$(echo "$line" | grep -o ✓)" ]; then
+     ((p++))
+   fi
+
+  done < <(source $file)
+done
+
+echo -e "\nTested: $t"\
+        "\nPassed: $p"\
+        "\nFailed: $(($t-$p))"
